@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ⚙️ SAYT NOMI (brauzer tab'ida ko'rinadi) -->
+<title>Sardor & Nilufar | To'y Taklifnomasi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9A96E;
+    --gold-light: #E8D5A3;
+    --gold-pale: #D9BD8E;
+    --dark: #0D0709;
+    --dark2: #170A10;
+    --dark3: #1E0E14;
+    --text: #E8D5C8;
+    --text-light: #B89488;
+    --rose: #C4607E;
+    --rose-light: #E8A0B4;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: radial-gradient(ellipse 120% 80% at 50% 0%, #1a0a13, var(--dark) 60%);
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ════════ PETALS — whole page, always on ════════ */
+  #petal-canvas {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 60;
+  }
+
+  /* ════════ LANGUAGE SWITCH ════════ */
+  .lang-switch {
+    position: fixed; top: 16px; right: 16px; z-index: 90;
+    display: flex; background: rgba(26,18,8,0.55);
+    border-radius: 100px; padding: 3px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+  .lang-btn {
+    border: none; background: none; cursor: pointer;
+    padding: 6px 14px; font-size: 11px; letter-spacing: 0.1em;
+    font-family: 'Montserrat', sans-serif; font-weight: 600;
+    color: var(--gold-light); border-radius: 100px;
+    transition: all 0.25s;
+  }
+  .lang-btn.active { background: var(--gold); color: var(--dark); }
+
+  /* ════════ INTRO — opening invitation card ════════ */
+  #intro {
+    position: fixed; inset: 0; z-index: 100;
+    background: radial-gradient(ellipse 90% 60% at 30% 20%, rgba(196,96,126,0.15), transparent 55%),
+      radial-gradient(ellipse 70% 50% at 80% 85%, rgba(201,169,110,0.1), transparent 55%),
+      var(--dark);
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.9s ease, visibility 0.9s ease;
+  }
+  #intro.hidden { opacity: 0; visibility: hidden; }
+
+  .card3d {
+    position: relative;
+    width: clamp(260px, 78vw, 380px);
+    height: clamp(360px, 70vh, 520px);
+  }
+  .card-face {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 32px;
+    background: transparent;
+    transition: opacity 1.1s ease, transform 1.1s ease;
+  }
+  .card-front {
+    z-index: 2; opacity: 1; transform: scale(1);
+  }
+  .card-back {
+    opacity: 0; transform: scale(0.97);
+  }
+  .card3d.open .card-front { opacity: 0; transform: scale(0.97); pointer-events: none; }
+  .card3d.open .card-back  { opacity: 1; transform: scale(1); }
+
+  .card-mono {
+    font-size: 10px; letter-spacing: 0.35em; color: var(--gold);
+    text-transform: uppercase; margin-bottom: 18px;
+  }
+  .card-names {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 7vw, 48px);
+    color: var(--gold-light); line-height: 1.15;
+  }
+  .card-and {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: clamp(18px, 4.5vw, 26px); color: var(--gold);
+    display: block; margin: 6px 0;
+  }
+  .card-date {
+    margin-top: 22px; font-size: 11px; letter-spacing: 0.25em;
+    color: var(--text-light); text-transform: uppercase;
+  }
+  .open-btn {
+    margin-top: 28px;
+    padding: 13px 42px;
+    border: none;
+    background: transparent; color: var(--gold-light);
+    font-family: 'Montserrat', sans-serif; font-size: 11px;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.3s;
+    box-shadow: 0 0 0 0 rgba(201,169,110,0.5);
+  }
+  .open-btn:hover { color: var(--gold); }
+  .open-btn.pulse {
+    animation: btnShadow 0.7s ease-out;
+  }
+  @keyframes btnShadow {
+    0%   { box-shadow: 0 0 0 0 rgba(201,169,110,0.55); }
+    100% { box-shadow: 0 0 0 28px rgba(201,169,110,0); }
+  }
+
+  .card-back-content { opacity: 0; transition: opacity 0.6s ease 0.7s; }
+  .card3d.open .card-back-content { opacity: 1; }
+
+  /* ════════ MAIN ════════ */
+  #main { display: none; background: var(--dark); }
+  #main.visible { display: block; }
+
+  .hero {
+    min-height: 100vh;
+    background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(196,96,126,0.12), transparent 60%), var(--dark);
+    position: relative; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 60px 24px; overflow: hidden;
+  }
+  .hero-ornament {
+    position: absolute; width: 320px; height: 320px; border-radius: 50%;
+    border: 1px solid rgba(201,169,110,0.15); top: 50%; left: 50%;
+    transform: translate(-50%, -50%); animation: pulse 4s ease-in-out infinite;
+  }
+  .hero-ornament:nth-child(2) { width: 500px; height: 500px; animation-delay: 0.5s; }
+  .hero-ornament:nth-child(3) { width: 700px; height: 700px; animation-delay: 1s; }
+
+  .hero-content { position: relative; z-index: 1; }
+  .hero-eyebrow {
+    font-size: 10px; letter-spacing: 0.4em; color: var(--gold);
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .hero-names {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 11vw, 88px);
+    color: var(--gold-light); line-height: 1;
+  }
+  .hero-names .and {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 0.45em; color: var(--gold); display: block; margin: 8px 0;
+  }
+  .hero-date {
+    margin-top: 32px; font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(16px, 4vw, 22px); color: var(--gold-light); letter-spacing: 0.1em;
+  }
+  .hero-line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    margin: 32px auto 0;
+  }
+
+  /* ════════ CALENDAR ════════ */
+  .calendar-section {
+    background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(196,96,126,0.08), transparent 60%), var(--dark);
+    padding: 0 24px clamp(60px,10vw,100px); text-align: center;
+  }
+  .calendar-month {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 6vw, 34px); color: var(--gold-light);
+    margin: 28px 0 28px; letter-spacing: 0.03em;
+  }
+  .calendar-grid {
+    display: grid; grid-template-columns: repeat(7,1fr);
+    gap: 10px; max-width: 320px; margin: 0 auto;
+  }
+  .calendar-dow {
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-light); padding-bottom: 8px;
+  }
+  .calendar-day {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px; color: var(--gold-pale);
+    width: 32px; height: 32px; line-height: 32px;
+    margin: 0 auto; border-radius: 50%;
+    position: relative;
+  }
+  .calendar-day span { position: relative; z-index: 2; }
+  .calendar-day.empty { opacity: 0; }
+  .calendar-day.wedding {
+    color: var(--gold-light); font-weight: 700;
+  }
+  .calendar-day.wedding::after {
+    content: '♥'; z-index: 1;
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px; color: var(--rose, #C4607E); opacity: 0.55;
+    filter: drop-shadow(0 0 14px rgba(201,169,110,0.6));
+    animation: heartBeat 1.4s ease-in-out infinite;
+  }
+  @keyframes heartBeat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.18); }
+  }
+
+  /* Countdown */
+  .countdown-section {
+    background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(201,169,110,0.08), transparent 60%), var(--dark);
+    padding: 60px 24px; text-align: center;
+  }
+  .countdown-label { font-size: 10px; letter-spacing: 0.4em; color: var(--gold); text-transform: uppercase; margin-bottom: 32px; }
+  .countdown-grid { display: flex; justify-content: center; gap: clamp(16px, 5vw, 48px); flex-wrap: wrap; }
+  .countdown-item { text-align: center; min-width: 60px; }
+  .countdown-num { font-family: 'Playfair Display', serif; font-size: clamp(30px, 8vw, 56px); color: var(--gold-light); line-height: 1; display: block; }
+  .countdown-unit { font-size: 9px; letter-spacing: 0.3em; color: var(--text-light); text-transform: uppercase; margin-top: 6px; display: block; }
+  .countdown-sep { font-family: 'Playfair Display', serif; font-size: 40px; color: var(--gold); line-height: 1; align-self: flex-start; padding-top: 4px; }
+
+  /* Section base */
+  .section { padding: clamp(60px, 10vw, 100px) 24px; max-width: 700px; margin: 0 auto; text-align: center; }
+  .section-eyebrow { font-size: 9px; letter-spacing: 0.4em; color: var(--gold); text-transform: uppercase; margin-bottom: 20px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5vw, 38px); color: var(--gold-light); margin-bottom: 20px; line-height: 1.2; }
+  .section-divider { width: 40px; height: 1px; background: var(--gold); margin: 20px auto; }
+  .section-text { font-family: 'Cormorant Garamond', serif; font-size: clamp(17px, 3vw, 20px); color: var(--text-light); line-height: 1.8; }
+
+  /* ═══ Family / Wishes section ═══ */
+  .families-section {
+    background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(196,96,126,0.08), transparent 60%), var(--dark);
+    padding: clamp(60px, 10vw, 100px) 24px;
+  }
+  .families-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+
+  .families-grid {
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    gap: 20px; align-items: center;
+    margin: 36px 0 12px;
+  }
+  .family-card {
+    padding: 8px;
+  }
+  .family-label {
+    font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 10px;
+  }
+  .family-names {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(17px, 4vw, 24px); color: var(--gold-light);
+    line-height: 1.35;
+  }
+  .family-parents {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 14px; color: var(--text-light); margin-top: 8px;
+  }
+  .families-amp {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: clamp(19px, 4.5vw, 28px); color: var(--gold);
+  }
+
+  .wish-box {
+    margin-top: 36px; padding: 32px 28px;
+    background: var(--dark3); box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .wish-box::before, .wish-box::after {
+    content: '✦'; position: absolute; color: var(--gold); font-size: 12px;
+  }
+  .wish-box::before { top: 12px; left: 14px; }
+  .wish-box::after { bottom: 12px; right: 14px; }
+  .wish-title {
+    font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 14px;
+  }
+  .wish-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(17px, 3.2vw, 21px); font-style: italic;
+    color: var(--text); line-height: 1.85;
+  }
+
+  /* Program */
+  .program-section {
+    background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(201,169,110,0.07), transparent 60%), var(--dark2);
+    padding: clamp(60px, 10vw, 100px) 24px;
+  }
+  .program-inner { max-width: 600px; margin: 0 auto; }
+  .program-item {
+    display: flex; align-items: flex-start; gap: 24px; padding: 24px 0;
+    border-bottom: 1px solid rgba(201,169,110,0.3);
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .program-item.visible { opacity: 1; transform: translateY(0); }
+  .program-time { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold); min-width: 70px; text-align: right; flex-shrink: 0; }
+  .program-info { text-align: left; }
+  .program-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--text); font-weight: 400; margin-bottom: 4px; }
+  .program-desc { font-size: 12px; color: var(--text-light); letter-spacing: 0.05em; }
+
+  /* ═══ Venue section — redesigned ═══ */
+  .location-section {
+    background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(196,96,126,0.1), transparent 60%), var(--dark);
+    padding: clamp(60px, 10vw, 100px) 24px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .location-section::before {
+    content: ''; position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,169,110,0.08), transparent 70%);
+  }
+  .venue-card {
+    position: relative; z-index: 1;
+    max-width: 420px; margin: 36px auto 0;
+    background: rgba(255,255,255,0.03);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    padding: 36px 28px;
+  }
+  .venue-icon { font-size: 26px; margin-bottom: 14px; }
+  .location-name {
+    font-family: 'Playfair Display', serif; font-size: clamp(22px, 5vw, 32px);
+    color: var(--gold-light); margin-bottom: 8px;
+  }
+  .location-address {
+    font-family: 'Cormorant Garamond', serif; font-size: 17px;
+    color: var(--text-light); font-style: italic; line-height: 1.7;
+    margin-bottom: 26px;
+  }
+  .map-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 38px; background: rgba(201,169,110,0.06); color: var(--gold);
+    font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+    text-decoration: none; transition: all 0.3s;
+    box-shadow: 0 0 0 0 rgba(201,169,110,0.5);
+  }
+  .map-btn:hover { background: var(--gold); color: var(--dark); }
+  .map-btn.pulse { animation: btnShadowMap 0.7s ease-out; }
+  @keyframes btnShadowMap {
+    0%   { box-shadow: 0 0 0 0 rgba(201,169,110,0.5); }
+    100% { box-shadow: 0 0 0 22px rgba(201,169,110,0); }
+  }
+
+  /* Footer */
+  footer {
+    background: radial-gradient(ellipse 70% 50% at 50% 100%, rgba(196,96,126,0.08), transparent 60%), var(--dark);
+    padding: 48px 24px; text-align: center;
+  }
+  .footer-names { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); margin-bottom: 12px; }
+  .footer-note { font-size: 11px; letter-spacing: 0.2em; color: var(--text-light); text-transform: uppercase; }
+
+  /* Floating music button */
+  .music-btn {
+    position: fixed; bottom: 24px; right: 24px; z-index: 80;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--gold); border: none; cursor: pointer;
+    display: none; align-items: center; justify-content: center; font-size: 18px;
+    box-shadow: 0 4px 20px rgba(201,169,110,0.4); transition: transform 0.3s;
+  }
+  .music-btn:hover { transform: scale(1.1); }
+  .music-btn.visible { display: flex; }
+  .music-btn.playing { animation: rotate 3s linear infinite; }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: translate(-50%,-50%) scale(1); }
+    50% { opacity: 0.1; transform: translate(-50%,-50%) scale(1.05); }
+  }
+  @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  @media (max-width: 480px) {
+    .countdown-sep { display: none; }
+    .families-grid { grid-template-columns: 1fr; gap: 6px; }
+    .families-amp { transform: rotate(90deg); padding: 4px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════ PETALS CANVAS — runs across whole page ════════ -->
+<canvas id="petal-canvas"></canvas>
+
+<!-- ════════ LANGUAGE SWITCH ════════ -->
+<div class="lang-switch">
+  <button class="lang-btn active" data-lang="uz" onclick="setLang('uz')">UZ</button>
+  <button class="lang-btn" data-lang="ru" onclick="setLang('ru')">RU</button>
+</div>
+
+<!-- ════════ INTRO — flipping invitation card ════════ -->
+<div id="intro">
+  <div class="card3d" id="card3d">
+    <div class="card-face card-front">
+      <!-- ⚙️ KELIN-KUYOV ISMI (kirish kartasi) -->
+      <div class="card-mono i18n" data-uz="Bismillahir Rohmanir Rohim" data-ru="С именем Аллаха">Bismillahir Rohmanir Rohim</div>
+      <div class="card-names">
+        Sardor<span class="card-and i18n" data-uz="va" data-ru="и">va</span>Nilufar
+      </div>
+      <div class="card-date i18n" data-uz="To'y Taklifnomasi · 2026" data-ru="Свадебное приглашение · 2026">To'y Taklifnomasi · 2026</div>
+      <button class="open-btn i18n" data-uz="Taklifnomani Ochish ✦" data-ru="Открыть приглашение ✦" onclick="openCard()">Taklifnomani Ochish ✦</button>
+    </div>
+    <div class="card-face card-back">
+      <div class="card-back-content">
+        <div class="card-mono i18n" data-uz="Xush kelibsiz" data-ru="Добро пожаловать">Xush kelibsiz</div>
+        <div class="card-names" style="font-size:clamp(26px,7vw,40px);">
+          <span class="i18n" data-uz="Taklifnomaga" data-ru="Приглашение">Taklifnomaga</span>
+        </div>
+        <div class="card-date i18n" data-uz="Pastga aylantiring ↓" data-ru="Прокрутите вниз ↓" style="margin-top:24px;">Pastga aylantiring ↓</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MAIN CONTENT ════════ -->
+<div id="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-ornament"></div>
+    <div class="hero-ornament"></div>
+    <div class="hero-ornament"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow i18n" data-uz="Nikoh To'yi · Bismillah" data-ru="Свадьба · С благословения">Nikoh To'yi · Bismillah</div>
+      <!-- ⚙️ KELIN-KUYOV ISMI (asosiy hero matni) -->
+      <div class="hero-names">
+        Sardor
+        <span class="and i18n" data-uz="va" data-ru="и">va</span>
+        Nilufar
+      </div>
+      <!-- ⚙️ TO'Y SANASI (matn ko'rinishida) -->
+      <div class="hero-date i18n" data-uz="27 · Dekabr · 2026" data-ru="27 · Декабря · 2026">27 · Dekabr · 2026</div>
+      <div class="hero-line"></div>
+    </div>
+  </section>
+
+  <!-- COUNTDOWN -->
+  <section class="countdown-section">
+    <div class="countdown-label i18n" data-uz="To'yga qadar" data-ru="До свадьбы осталось">To'yga qadar</div>
+    <div class="countdown-grid">
+      <div class="countdown-item">
+        <span class="countdown-num" id="cd-days">000</span>
+        <span class="countdown-unit i18n" data-uz="Kun" data-ru="Дней">Kun</span>
+      </div>
+      <div class="countdown-sep">·</div>
+      <div class="countdown-item">
+        <span class="countdown-num" id="cd-hours">00</span>
+        <span class="countdown-unit i18n" data-uz="Soat" data-ru="Часов">Soat</span>
+      </div>
+      <div class="countdown-sep">·</div>
+      <div class="countdown-item">
+        <span class="countdown-num" id="cd-minutes">00</span>
+        <span class="countdown-unit i18n" data-uz="Daqiqa" data-ru="Минут">Daqiqa</span>
+      </div>
+      <div class="countdown-sep">·</div>
+      <div class="countdown-item">
+        <span class="countdown-num" id="cd-seconds">00</span>
+        <span class="countdown-unit i18n" data-uz="Soniya" data-ru="Секунд">Soniya</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="calendar-section">
+    <div class="reveal">
+      <div class="countdown-label i18n" data-uz="Kalendar" data-ru="Календарь">Kalendar</div>
+      <!-- ⚙️ OY NOMI: to'y bo'ladigan oy va yilni yozing -->
+      <div class="calendar-month i18n" data-uz="Dekabr 2026" data-ru="Декабрь 2026">Dekabr 2026</div>
+      <div class="calendar-grid" id="calGrid"><!-- JS orqali to'ldiriladi --></div>
+    </div>
+  </section>
+
+  <!-- ═══ FAMILIES & WISH TO GUEST ═══ -->
+  <section class="families-section">
+    <div class="families-inner reveal">
+      <div class="section-eyebrow i18n" data-uz="Ikki Oila" data-ru="Две семьи">Ikki Oila</div>
+      <div class="section-title i18n" data-uz="Farzandlarimizning To'yi" data-ru="Свадьба наших детей">Farzandlarimizning To'yi</div>
+      <div class="section-divider"></div>
+
+      <!-- ⚙️ BU YERGA: kuyov va kelin oilasi ismlarini almashtiring -->
+      <div class="families-grid">
+        <div class="family-card">
+          <div class="family-label i18n" data-uz="Kuyovning oilasi" data-ru="Семья жениха">Kuyovning oilasi</div>
+          <div class="family-names">Karimov Oilasi</div>
+          <div class="family-parents i18n" data-uz="Anvar va Gulnora Karimovlar" data-ru="Анвар и Гулнора Каримовы">Anvar va Gulnora Karimovlar</div>
+        </div>
+        <div class="families-amp">&amp;</div>
+        <div class="family-card">
+          <div class="family-label i18n" data-uz="Kelinning oilasi" data-ru="Семья невесты">Kelinning oilasi</div>
+          <div class="family-names">Yusupov Oilasi</div>
+          <div class="family-parents i18n" data-uz="Bahodir va Malika Yusupovlar" data-ru="Баходир и Малика Юсуповы">Bahodir va Malika Yusupovlar</div>
+        </div>
+      </div>
+
+      <!-- ⚙️ BU YERGA: mehmonga tilak matnini almashtirishingiz mumkin -->
+      <div class="wish-box">
+        <div class="wish-title i18n" data-uz="Aziz Mehmonga" data-ru="Дорогому гостю">Aziz Mehmonga</div>
+        <p class="wish-text i18n"
+          data-uz="Hayotimizning eng baxtli kunida — farzandlarimiz Sardor va Nilufarning nikoh to'yida — sizni ham baxtimizga sherik bo'lishga chorlaymiz. Sizning duo va tilaklaringiz bizning oilamiz uchun eng qadrli sovg'a bo'ladi. Kelishingizni katta intizorlik bilan kutamiz."
+          data-ru="В самый счастливый день нашей жизни — на свадьбе наших детей Сардора и Нилуфар — мы приглашаем вас разделить с нами эту радость. Ваши пожелания и благословения станут самым дорогим подарком для нашей семьи. С большим теплом ждём вашего прихода.">
+          Hayotimizning eng baxtli kunida — farzandlarimiz Sardor va Nilufarning nikoh to'yida — sizni ham baxtimizga sherik bo'lishga chorlaymiz. Sizning duo va tilaklaringiz bizning oilamiz uchun eng qadrli sovg'a bo'ladi. Kelishingizni katta intizorlik bilan kutamiz.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRAM -->
+  <section class="program-section">
+    <div class="program-inner">
+      <div class="section-eyebrow reveal i18n" data-uz="Dastur" data-ru="Программа" style="text-align:center;">Dastur</div>
+      <div class="section-title reveal i18n" data-uz="To'y Kechasi" data-ru="Свадебный вечер" style="text-align:center;">To'y Kechasi</div>
+      <div class="section-divider reveal"></div>
+
+      <div class="program-item">
+        <div class="program-time">17:00</div>
+        <div class="program-info">
+          <div class="program-name i18n" data-uz="Mehmonlarni Kutib Olish" data-ru="Встреча гостей">Mehmonlarni Kutib Olish</div>
+          <div class="program-desc i18n" data-uz="Xush kelibsiz!" data-ru="Добро пожаловать!">Xush kelibsiz!</div>
+        </div>
+      </div>
+      <div class="program-item">
+        <div class="program-time">18:00</div>
+        <div class="program-info">
+          <div class="program-name i18n" data-uz="Nikoh Marosimi" data-ru="Церемония бракосочетания">Nikoh Marosimi</div>
+          <div class="program-desc i18n" data-uz="Qoʻshilish marosimi boshlanadi" data-ru="Начинается церемония">Qoʻshilish marosimi boshlanadi</div>
+        </div>
+      </div>
+      <div class="program-item">
+        <div class="program-time">19:00</div>
+        <div class="program-info">
+          <div class="program-name i18n" data-uz="Ziyofat Dasturxoni" data-ru="Праздничный стол">Ziyofat Dasturxoni</div>
+          <div class="program-desc i18n" data-uz="Bayram taomi va suhbat" data-ru="Угощения и общение">Bayram taomi va suhbat</div>
+        </div>
+      </div>
+      <div class="program-item">
+        <div class="program-time">20:30</div>
+        <div class="program-info">
+          <div class="program-name i18n" data-uz="Bazmda Raqs va Qoʻshiqlar" data-ru="Танцы и песни">Bazmda Raqs va Qoʻshiqlar</div>
+          <div class="program-desc i18n" data-uz="Musiqiy dastur boshlanadi" data-ru="Начинается музыкальная программа">Musiqiy dastur boshlanadi</div>
+        </div>
+      </div>
+      <div class="program-item" style="border-bottom:none;">
+        <div class="program-time">23:00</div>
+        <div class="program-info">
+          <div class="program-name i18n" data-uz="Xayrlashuv" data-ru="Прощание">Xayrlashuv</div>
+          <div class="program-desc i18n" data-uz="Borib kelgaysiz, azizlar!" data-ru="Счастливого пути, дорогие гости!">Borib kelgaysiz, azizlar!</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ LOCATION — redesigned ═══ -->
+  <section class="location-section">
+    <div class="reveal">
+      <div class="section-eyebrow i18n" data-uz="To'yxona Manzili" data-ru="Место проведения" style="color:var(--gold);">To'yxona Manzili</div>
+      <div class="section-title i18n" data-uz="Bizni Kutib Oling" data-ru="Ждём вас здесь" style="color:var(--gold-light);">Bizni Kutib Oling</div>
+
+      <div class="venue-card">
+        <svg class="venue-icon" width="56" height="56" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin:0 auto 16px;display:block;">
+          <path d="M32 4 L32 12" stroke="#C9A96E" stroke-width="1" stroke-linecap="round"/>
+          <circle cx="32" cy="2" r="1.5" fill="#C9A96E"/>
+          <path d="M14 58 V30 C14 18 22 12 32 12 C42 12 50 18 50 30 V58" stroke="#C9A96E" stroke-width="1" fill="none"/>
+          <path d="M20 58 V34 C20 24 25 18 32 18 C39 18 44 24 44 34 V58" stroke="#C9A96E" stroke-width="1" fill="none" opacity="0.6"/>
+          <path d="M28 58 V40 C28 35 29.5 32 32 32 C34.5 32 36 35 36 40 V58" stroke="#C9A96E" stroke-width="1" fill="none" opacity="0.4"/>
+          <line x1="10" y1="58" x2="54" y2="58" stroke="#C9A96E" stroke-width="1"/>
+          <line x1="6" y1="61" x2="58" y2="61" stroke="#C9A96E" stroke-width="0.6" opacity="0.5"/>
+        </svg>
+        <!-- ⚙️ BU YERGA: to'yxona nomi va manzilini almashtiring -->
+        <div class="location-name">Hilol To'yxonasi</div>
+        <div class="location-address i18n"
+          data-uz="Toshkent shahri, Yunusobod tumani,<br>Amir Temur ko'chasi, 45-uy"
+          data-ru="Город Ташкент, Юнусабадский район,<br>улица Амира Темура, дом 45">
+          Toshkent shahri, Yunusobod tumani,<br>Amir Temur ko'chasi, 45-uy
+        </div>
+        <!-- ⚙️ XARITA LINKI: shu yerga Yandex/Google Maps havolasini qo'ying -->
+        <a href="https://yandex.com/maps" target="_blank" class="map-btn" onclick="this.classList.add('pulse')">
+          🗺 <span class="i18n" data-uz="Xaritada Ko'rish" data-ru="Открыть карту">Xaritada Ko'rish</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <!-- ⚙️ FOOTER: kelin-kuyov ismi va sana -->
+    <div class="footer-names reveal">Sardor &amp; Nilufar</div>
+    <div class="footer-note reveal i18n" data-uz="27 · 12 · 2026 · Toshkent" data-ru="27 · 12 · 2026 · Ташкент">27 · 12 · 2026 · Toshkent</div>
+    <div style="margin-top:24px;font-size:10px;color:#3D2B1040;letter-spacing:0.1em;">
+      Made with ❤ for this special day
+    </div>
+  </footer>
+
+</div><!-- /main -->
+
+<!-- ════════ MUSIC ════════ -->
+<button class="music-btn" id="musicBtn" title="Musiqa">♪</button>
+
+<!-- ⚙️⚙️⚙️ MUSIQA FAYLI ⚙️⚙️⚙️
+     Musiqa faylingizni "musiqa.m4a" deb nomlab, shu index.html bilan
+     BIR XIL papkaga yuklang. Boshqa hech narsa o'zgartirish shart emas. -->
+<audio id="bgAudio" loop>
+  <source src="musiqa.m4a" type="audio/mp4">
+</audio>
+
+<script>
+  /* ═══════════════════ I18N ═══════════════════ */
+  function setLang(lang) {
+    document.querySelectorAll('.i18n').forEach(el => {
+      const val = el.getAttribute('data-' + lang);
+      if (val !== null) el.innerHTML = val;
+    });
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    document.documentElement.lang = lang;
+  }
+
+  /* ═══════════════════ PETALS (whole page, continuous) ═══════════════════ */
+  const canvas = document.getElementById('petal-canvas');
+  const ctx = canvas.getContext('2d');
+  let petals = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = document.documentElement.scrollHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('load', resizeCanvas);
+
+  class Petal {
+    constructor() { this.reset(true); }
+    reset(init) {
+      this.x = Math.random() * canvas.width;
+      this.y = init ? Math.random() * window.innerHeight : -20;
+      this.size = 5 + Math.random() * 8;
+      this.speedY = 0.4 + Math.random() * 0.7;
+      this.rotation = Math.random() * Math.PI * 2;
+      this.rotSpeed = (Math.random() - 0.5) * 0.02;
+      this.opacity = 0.35 + Math.random() * 0.45;
+      this.swing = Math.random() * Math.PI * 2;
+      this.swingSpeed = 0.01 + Math.random() * 0.015;
+      this.swingAmp = 0.4 + Math.random() * 1;
+      const palette = [[201,169,110],[232,213,163],[245,237,216],[212,184,150],[196,96,126],[232,160,180]];
+      this.color = palette[Math.floor(Math.random()*palette.length)];
+    }
+    update(scrollY) {
+      this.swing += this.swingSpeed;
+      this.x += Math.sin(this.swing) * this.swingAmp;
+      this.y += this.speedY;
+      this.rotation += this.rotSpeed;
+      if (this.y - scrollY > window.innerHeight + 20 || this.y > canvas.height) this.reset();
+    }
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      ctx.globalAlpha = this.opacity;
+      const [r,g,b] = this.color;
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.beginPath();
+      ctx.moveTo(0, -this.size);
+      ctx.bezierCurveTo(this.size*0.6, -this.size*0.6, this.size*0.8, this.size*0.2, 0, this.size*0.5);
+      ctx.bezierCurveTo(-this.size*0.8, this.size*0.2, -this.size*0.6, -this.size*0.6, 0, -this.size);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  function initPetals() {
+    resizeCanvas();
+    petals = Array.from({length: 50}, () => new Petal());
+  }
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    petals.forEach(p => { p.update(window.scrollY); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  initPetals();
+  animate();
+
+  /* ═══════════════════ OPEN CARD ═══════════════════ */
+  function openCard() {
+    const btn = document.querySelector('.open-btn');
+    btn.classList.add('pulse');
+    const card = document.getElementById('card3d');
+    card.classList.add('open');
+    setTimeout(() => {
+      document.getElementById('intro').classList.add('hidden');
+      const main = document.getElementById('main');
+      main.classList.add('visible');
+      document.getElementById('musicBtn').classList.add('visible');
+      resizeCanvas();
+      initAll();
+    }, 1600);
+  }
+
+  function initAll() {
+    startCountdown();
+    initScrollReveal();
+    initProgramReveal();
+    renderCalendar();
+  }
+
+  /* ═══════════════════ CALENDAR ═══════════════════ */
+  /* ⚙️ TO'Y SANASI: kerak bo'lsa kun, oy(0-11), yilni o'zgartiring */
+  function renderCalendar() {
+    const weddingDay = 27, month = 11, year = 2026; // Dekabr = 11
+    const grid = document.getElementById('calGrid');
+    const dows = ['Du','Se','Ch','Pa','Ju','Sh','Ya'];
+    dows.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'calendar-dow';
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+    const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let i = 0; i < firstDay; i++) {
+      const e = document.createElement('div');
+      e.className = 'calendar-day empty';
+      grid.appendChild(e);
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const e = document.createElement('div');
+      e.className = 'calendar-day' + (d === weddingDay ? ' wedding' : '');
+      e.innerHTML = '<span>' + d + '</span>';
+      grid.appendChild(e);
+    }
+  }
+
+  /* ═══════════════════ COUNTDOWN ═══════════════════ */
+  /* ⚙️ TO'Y SANASI: kerak bo'lsa shu sanani o'zgartiring */
+  function startCountdown() {
+    const target = new Date('2026-12-27T17:00:00');
+    function update() {
+      const diff = target - new Date();
+      if (diff <= 0) { document.getElementById('cd-days').textContent = '000'; return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      document.getElementById('cd-days').textContent = String(d).padStart(3,'0');
+      document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+      document.getElementById('cd-minutes').textContent = String(m).padStart(2,'0');
+      document.getElementById('cd-seconds').textContent = String(s).padStart(2,'0');
+    }
+    update(); setInterval(update, 1000);
+  }
+
+  /* ═══════════════════ SCROLL REVEAL ═══════════════════ */
+  function initScrollReveal() {
+    const els = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    els.forEach(el => obs.observe(el));
+  }
+  function initProgramReveal() {
+    const items = document.querySelectorAll('.program-item');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 120);
+      });
+    }, { threshold: 0.1 });
+    items.forEach(el => obs.observe(el));
+  }
+
+  /* ═══════════════════ MUSIC — audio fayl (m4a) ═══════════════════ */
+  const audio = document.getElementById('bgAudio');
+  const musicBtn = document.getElementById('musicBtn');
+  let playing = false;
+
+  musicBtn.addEventListener('click', () => {
+    if (!playing) {
+      audio.play().catch(() => {});
+      musicBtn.textContent = '♫';
+      musicBtn.classList.add('playing');
+    } else {
+      audio.pause();
+      musicBtn.textContent = '♪';
+      musicBtn.classList.remove('playing');
+    }
+    playing = !playing;
+  });
+</script>
+</body>
+</html>
